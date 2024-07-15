@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Send Files | Filedrop</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="{% static 'css/filedrop.css' %}" rel="stylesheet">
+</head>
+<script>
+    function copyCode() {
+        var codeElement = document.getElementById("code");
+        navigator.clipboard.writeText(codeElement.innerHTML)
+            .then(function () {
+                alert('Code copied to clipboard');
+            })
+            .catch(function (error) {
+                console.error('Copy failed: ', error);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+        const messageLabel = document.getElementById('message');
+        const messageContainer = document.getElementById('message-container');
+
+        fileInput.addEventListener('change', function () {
+            updateMessageLabel();
+        });
+
+        dropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
+
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateMessageLabel();
+            }
+        });
+
+
+        function updateMessageLabel() {
+            const selectedFiles = fileInput.files;
+            if (selectedFiles.length > 0) {
+                messageLabel.textContent = `Selected files: ${Array.from(selectedFiles).map(file => file.name).join(', ')}`;
+                messageContainer.classList.add('bg-red-700/50');
+                messageContainer.style.display = 'block';
+            } else {
+                messageLabel.textContent = '';
+                messageContainer.classList.remove('g-red-700/50');
+                messageContainer.style.display = 'none';
+            }
+        }
+
+        updateMessageLabel();
+    });
+
+</script>
+<body>
+<div class="relative h-screen" style="background-image: url('{% static 'images/background.png' %}')">
+    <div class="backdrop-blur-md h-screen">
+        <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-28">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl" style="font-family: Satisfy, cursive">Send
+                    Files</h1>
+                {% if code %}
+                <div class="mt-24 text-2xl text-center">Your code:</div>
+                <div class="mt-2 text-8xl text-center font-mono" id="code">{{ code }}</div>
+                <button class="mt-2 relative inline-flex items-center justify-center p-4 px-3 py-1 overflow-hidden font-medium text-black transition duration-300 ease-out border-2 border-black rounded-full group"
+                        for="{{ form.file.id_for_label }}"
+                        onclick="copyCode()">
+                        <span class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-black group-hover:translate-x-0 ease">
+                        <svg class="w-8 h-8" fill="none" stroke="white" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <rect height="14" rx="2" ry="2" width="12" x="2" y="2"/>
+                            <rect height="14" rx="2" ry="2" width="12" x="6" y="6"/>
+                        </svg>
+                    </span>
+                    <span class="absolute flex items-center justify-center w-full h-full text-black transition-all duration-300 transform group-hover:translate-x-full ease">Copy Code</span>
+                    <span class="relative invisible">Copy Code</span>
+                </button>
+
+                {% else %}
+                <form enctype="multipart/form-data" method="post">
+                    <div class="col-span-full">
+                        <div class="mt-4 flex justify-center rounded-lg border-4 border-dashed border-rose-900/50 px-10 py-24"
+                             id="drop-zone">
+                            <div class="text-center">
+                                <svg aria-hidden="true" class="mx-auto h-20 w-20" fill="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path clip-rule="evenodd"
+                                          d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
+                                          fill-rule="evenodd"/>
+                                </svg>
+                                <div class="mt-4 flex text-xl leading-6">
+                                    <label class="relative inline-flex items-center justify-center p-4 px-3 py-1 overflow-hidden font-medium text-black transition duration-300 ease-out border-2 border-black rounded-full group"
+                                           for="{{ form.file.id_for_label }}">
+                                        <span class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-black group-hover:translate-x-0 ease">
+                                        <svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg"><path d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                                                                      stroke-linecap="round"
+                                                                                      stroke-linejoin="round"
+                                                                                      stroke-width="2"></path></svg>
+                                        </span>
+                                        <span class="absolute flex items-center justify-center w-full h-full text-black transition-all duration-300 transform group-hover:translate-x-full ease">Upload a file</span>
+                                        <span class="relative invisible">Upload a file</span>
+                                        <input class="sr-only" id="{{ form.file.id_for_label }}"
+                                               multiple name="{{ form.file.name }}" type="file">
+                                    </label>
+                                    <p class="pl-1 mt-1">or drag and drop</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex bg-red-700/50 backdrop-blur-xl rounded-md content-center items-center justify-center"
+                         id="message-container"
+                         style="overflow-y: scroll; max-height: 50px;">
+                        <label class="block mt-2 text-sm" id="message"></label>
+                    </div>
+
+                    <button class="mt-4 relative inline-flex items-center justify-center inline-block p-4 px-5 py-3 overflow-hidden font-medium text-red-600 rounded-lg shadow-2xl group">
+                        <span class="absolute top-0 left-0 w-40 h-40 -mt-10 -ml-3 transition-all duration-700 bg-rose-700 rounded-full blur-md ease"></span>
+                        <span class="absolute inset-0 w-full h-full transition duration-700 group-hover:-rotate-180 ease">
+                        <span class="absolute bottom-0 left-0 w-24 h-24 -ml-10 bg-rose-600 rounded-full blur-md"></span>
+                        <span class="absolute bottom-0 right-0 w-24 h-24 -mr-10 bg-red-600 rounded-full blur-md"></span>
+                        </span>
+                        <span class="relative text-white">Send Files</span>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

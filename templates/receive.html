@@ -1,0 +1,152 @@
+<!-- receive.html -->
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Receive Files | Filedrop</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="{% static 'css/filedrop.css' %}" rel="stylesheet">
+</head>
+<script>
+    function moveToNext(input, nextId) {
+        if (input.value.length === 1) {
+            document.getElementById(nextId).focus();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('paste', function (e) {
+            e.preventDefault();
+            var pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            var boxes = pastedText.split('');
+            var currentBox = 1;
+
+            boxes.forEach(function (character) {
+                if (currentBox <= 7) {
+                    document.getElementById('box' + currentBox).value = character;
+                    currentBox++;
+                }
+            });
+
+            document.getElementById('box1').focus();
+        });
+
+            document.getElementById('codeForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var code = '';
+                for (var i = 1; i <= 7; i++) {
+                    code += document.getElementById('box' + i).value;
+                }
+
+                document.getElementById('code_input').value = code;
+
+                this.submit();
+            });
+    });
+</script>
+<body>
+<div class="relative h-screen" style="background-image: url('{% static 'images/background.png' %}')">
+    <div class="backdrop-blur-md h-screen">
+        <div class="mx-auto max-w-full px-32 py-20">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl" style="font-family: Satisfy, cursive">Receive
+                    Files</h1>
+                {% if not code_input %}
+                <form id="codeForm" method="post">
+                    <div class="mt-24 text-center text-2xl">
+                        Enter or paste drop code:
+                    </div>
+                    <input id="code_input" name="code_input" type="hidden"/>
+                    <div class="mt-4 space-x-2">
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box1"
+                               maxlength="1" oninput="moveToNext(this, 'box2')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box2"
+                               maxlength="1" oninput="moveToNext(this, 'box3')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box3"
+                               maxlength="1" oninput="moveToNext(this, 'box4')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box4"
+                               maxlength="1" oninput="moveToNext(this, 'box5')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box5"
+                               maxlength="1" oninput="moveToNext(this, 'box6')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box6"
+                               maxlength="1" oninput="moveToNext(this, 'box7')" type="text"/>
+                        <input class="w-14 h-14 rounded text-center font-mono text-4xl bg-rose-700/50" id="box7"
+                               maxlength="1" type="text"/>
+                    </div>
+                    <button class="mt-4 relative inline-flex items-center justify-center inline-block p-4 px-5 py-3 overflow-hidden font-medium text-red-600 rounded-lg shadow-2xl group"
+                            type="submit">
+                        <span class="absolute top-0 left-0 w-40 h-40 -mt-10 -ml-3 transition-all duration-700 bg-rose-700 rounded-full blur-md ease"></span>
+                        <span class="absolute inset-0 w-full h-full transition duration-700 group-hover:-rotate-180 ease">
+                        <span class="absolute bottom-0 left-0 w-24 h-24 -ml-10 bg-rose-600 rounded-full blur-md"></span>
+                        <span class="absolute bottom-0 right-0 w-24 h-24 -mr-10 bg-red-600 rounded-full blur-md"></span>
+                        </span>
+                        <span class="relative text-white">Receive Files</span>
+                    </button>
+                </form>
+                {% endif %}
+                {% if code_input %}
+                {% if drops %}
+                <div class="mt-4 text-center text-2xl">Files associated with code: {{ code_input }}</div>
+                <a href="/{{ download_link }}" class="mt-4 relative inline-flex items-center justify-center inline-block p-4 px-5 py-3 overflow-hidden font-medium text-red-600 rounded-lg shadow-2xl group"
+                        type="submit">
+                    <span class="absolute top-0 left-0 w-40 h-40 -mt-10 -ml-3 transition-all duration-700 bg-rose-700 rounded-full blur-md ease"></span>
+                    <span class="absolute inset-0 w-full h-full transition duration-700 group-hover:-rotate-180 ease">
+                        <span class="absolute bottom-0 left-0 w-24 h-24 -ml-10 bg-rose-600 rounded-full blur-md"></span>
+                        <span class="absolute bottom-0 right-0 w-24 h-24 -mr-10 bg-red-600 rounded-full blur-md"></span>
+                        </span>
+                    <span class="relative text-white">Download All</span>
+                </a>
+
+                <div class="mt-6 relative overflow-x-auto sm:rounded-lg max-h-96">
+                    <table class="w-full text-sm text-left text-white ">
+                        <thead class="text-xs bg-red-900/75 backdrop-blur-3xl uppercase">
+                        <tr>
+                            <th class="px-6 py-3" scope="col">
+                                File Name
+                            </th>
+                            <th class="px-6 py-4" scope="col">
+                                Download Link
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for drop in drops %}
+                        <tr class="border-b border-gray-700 bg-rose-900/25 backdrop-blur-3xl">
+                            <th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                                scope="row">
+                                {{ drop.file.name|cut:'uploads/' }}
+                            </th>
+                            <td class="px-6 py-4">
+                                <a href="{{ drop.file.url }}" target="_blank" class="mt-2 relative inline-flex items-center justify-center p-4 px-3 py-1 overflow-hidden font-medium text-black transition duration-300 ease-out border-2 border-black rounded-full group"
+                                        for="{{ form.file.id_for_label }}"
+                                        onclick="copyCode()">
+                                    <span class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-black group-hover:translate-x-0 ease">
+                                        <svg class="w-8 h-8" fill="none" stroke="white" viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                             <path d="M12 5v14M5 12l7 7 7-7"
+                                                   stroke-linecap="round"
+                                                   stroke-linejoin="round"
+                                                   stroke-width="2"/>
+                                        </svg>
+                                    </span>
+                                    <span class="absolute flex items-center justify-center w-full h-full text-black transition-all duration-300 transform group-hover:translate-x-full ease">Download</span>
+                                    <span class="relative invisible">Download</span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>No files found for this code.</p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
